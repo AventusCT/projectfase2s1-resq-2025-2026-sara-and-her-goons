@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Magazijn Beheer</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background-color: #f9f9f9;
+      color: #333;
+    }
+
+    h2 {
+      margin-top: 40px;
+    }
+
+    .card {
+      background: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+      max-width: 600px;
+    }
+
+    label {
+      display: block;
+      margin: 10px 0 4px;
+      font-weight: bold;
+    }
+
+    input, select, button {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 12px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+    }
+
+    button {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    .btn-danger {
+      background-color: #d9534f;
+    }
+
+    .btn-secondary {
+      background-color: #999;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    table, th, td {
+      border: 1px solid #ccc;
+    }
+
+    th, td {
+      padding: 8px;
+      text-align: left;
+    }
+
+    .grid {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .box {
+      border: 1px solid #aaa;
+      padding: 10px;
+      border-radius: 8px;
+      background: #fff;
+      min-width: 100px;
+      text-align: center;
+    }
+
+    @media (max-width: 600px) {
+      .card {
+        max-width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<h1>Magazijnbeheer</h1>
+
+<!-- Kast / plank bewerken -->
+<div class="card">
+  <h2>Kast / Plank beheren</h2>
+
+  <label for="kastnaam">Kastnaam</label>
+  <input type="text" id="kastnaam" placeholder="Kastnummer...">
+
+  <label for="planknummer">Planknummer</label>
+  <input type="text" id="planknummer" placeholder="Planknummer...">
+
+  <label for="itemnaam">Itemnaam</label>
+  <input type="text" id="itemnaam" placeholder="Naam...">
+
+  <label for="capaciteit">Capaciteit</label>
+  <input type="number" id="capaciteit" placeholder="Aantal...">
+
+  <label for="barcode">Barcode</label>
+  <input type="text" id="barcode" placeholder="Barcode...">
+
+  <button class="btn-priority">Opslaan</button>
+  <button class="btn-danger">Verwijderen</button>
+  <button class="btn-secondary">Annuleren</button>
+</div>
+
+  
+  <div class="card">
+    <h2>Items verplaatsen</h2>
+    <input type="text" placeholder="Zoek item (Naam/barcode)">
+
+    <label>Huidige locatie</label>
+    <input type="text" value="Kast A, Plank 3" disabled>
+
+    <label>Nieuwe locatie</label>
+    <select>
+      <option>Kast A</option>
+      <option>Kast B</option>
+      <option>Kast C</option>
+      <option>Kast D</option>
+      <option>Kast E</option>
+      <option>Kast F</option>
+    </select>
+    <select>
+      <option>Plank 1</option>
+      <option>Plank 2</option>
+      <option>Plank 3</option>
+      <option>Plank 4</option>
+      <option>Plank 5</option>
+    </select>
+
+    <button>Verplaatsen</button>
+  </div>
+
+  
+  <div class="card">
+    <h2>Itemlocatie bekijken</h2>
+    <input type="text" placeholder="Zoek item (barcode/naam)">
+    <table>
+      <tr><th>Itemnaam</th><th>Itemcode</th><th>Locatie</th></tr>
+      <tr><td>Hamer</td><td>1234</td><td>Kast A</td></tr>
+      <tr><td>Boormachine</td><td>2345</td><td>Kast B</td></tr>
+    </table>
+  </div>
+
+  <!-- Visuele weergave -->
+  <div class="card">
+    <h2>Visuele weergave magazijn</h2>
+    <input type="text" placeholder="Search">
+    <div class="grid">
+      <div class="box">
+        <strong>Kast A</strong><br>
+        Plank 1
+      </div>
+      <div class="box">
+        <strong>Kast B</strong><br>
+        Plank 1
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>
