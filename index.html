@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Reservaties – Epic 3 (Frontend Prototype)</title>
+  <!--
+  ============================================================
+  README / Installatie & Gebruik (Frontend Only)
+  ------------------------------------------------------------
+  Dit is een minimale frontend (HTML/CSS/JS) die een reserveringssysteem
+  simuleert voor Epic 3. Data wordt bewaard in localStorage, zodat je
+  zonder backend de user stories kunt tonen tijdens een demo.
+
+  ⚙️ Installatie
+  1) Download dit bestand als index.html.
+  2) Open index.html in je browser (dubbelklikken is genoeg).
+  3) (Optioneel) Start een eenvoudige webserver voor betere ervaring:
+     - Python:   python3 -m http.server 8080
+     - Node:     npx http-server -p 8080
+
+  👤 Demo-accounts
+  - Voer je naam in het veld "Medewerker naam" in; zo filter je je eigen
+    reserveringen in het "Mijn reserveringen"-paneel.
+  - Vink "Admin modus" aan om álle reserveringen te zien en te beheren.
+
+  📦 Scope van deze demo
+  - Must: reserveren met begin- & eindtijd, overlap-validatie, eigen
+          reserveringen inzien/aanpassen/annuleren, admin voorkomt dubbele
+          reserveringen via validatie en kan alles beheren.
+  - Should: in-app bevestigingen bij (a) aanmaken, (b) wijzigen, (c) annuleren.
+  - Openingstijden voorbeeld: 08:00 – 18:00 (aanpasbaar hieronder).
+  - Beleidsregel voorbeeld: annuleren/wijzigen tot 1 uur vóór start.
+
+  🧩 Wat ontbreekt (backend-taken)
+  - E-mailbevestiging: vereist backend/SMTP; in deze demo vervangen door
+    in‑app notificaties (toasts).
+  - Auth/rollen: niet geïmplementeerd; Admin is een UI‑schakelaar.
+
+  📝 Versiebeheer
+  - Plaats dit bestand in je bestaande repo (opdracht 1) en commit/push.
+
+  💡 Uitbreidingspunten
+  - Koppel aan echte API (CRUD, auth, e‑mail)
+  - iCal export, resources-kalender, openingstijden per item, etc.
+  ============================================================
+  -->
+  <style>
+    :root{
+      --bg:#0b0e14;          /* donker thema */
+      --panel:#131827;       /* panel achtergrond */
+      --muted:#9aa4bf;       /* gedempte tekst */
+      --text:#eef2ff;        /* hoofdtekst */
+      --brand:#5b8cfe;       /* primair */
+      --danger:#ff6b6b;      /* fouten */
+      --success:#27c093;     /* succes */
+      --warn:#ffb86b;        /* waarschuwing */
+      --border:#232a3d;      /* randen */
+      --radius:16px;
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      background: radial-gradient(1200px 800px at 80% -10%, #1a2240 0%, transparent 60%) , var(--bg);
+      color:var(--text);
+    }
+    header{
+      max-width:1100px; margin:32px auto 16px; padding:0 20px;
+      display:flex; align-items:center; gap:16px; flex-wrap:wrap;
+    }
+    .logo{font-weight:700; font-size:20px; letter-spacing:.4px}
+    .chip{border:1px solid var(--border); padding:6px 10px; border-radius:999px; color:var(--muted)}
+    main{max-width:1100px; margin:0 auto 80px; padding:0 20px;}
+    .grid{display:grid; grid-template-columns: 1.15fr .85fr; gap:20px}
+    @media (max-width: 980px){ .grid{grid-template-columns: 1fr} }
+
+    .card{
+      background:linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,0));
+      border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow);
+      overflow:hidden
+    }
+    .card h2{margin:0; padding:16px 18px; font-size:18px; border-bottom:1px solid var(--border); background:rgba(255,255,255,.02)}
+    .card .content{padding:18px}
+
+    .row{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+    .row-3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px}
+    .row-4{display:grid; grid-template-columns:repeat(4, 1fr); gap:12px}
+    @media (max-width: 680px){ .row, .row-3, .row-4{grid-template-columns:1fr} }
+
+    label{font-size:12px; color:var(--muted); display:block; margin:0 0 6px}
+    input, select, button, textarea{
+      width:100%; padding:12px 12px; border-radius:12px; border:1px solid var(--border);
+      background:#0f1424; color:var(--text); outline:none;
+    }
+    input[type="date"], input[type="time"], select{ cursor:pointer }
+    button{ background:linear-gradient(180deg, #5b8cfe, #527df0); border:none; font-weight:600; letter-spacing:.2px }
+    button.secondary{ background:transparent; border:1px solid var(--border); color:var(--text) }
+    button.ghost{ background:transparent; border:1px dashed var(--border); color:var(--muted) }
+    button.danger{ background:linear-gradient(180deg, #ff7b7b, #ff6464) }
+    button.warn{ background:linear-gradient(180deg, #ffce7b, #ffb05e) }
+
+    .toolbar{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+    .toolbar .spacer{flex:1}
+
+    .products{display:grid; grid-template-columns:repeat(3, 1fr); gap:12px}
+    @media (max-width:900px){ .products{grid-template-columns:repeat(2, 1fr)} }
+    @media (max-width:620px){ .products{grid-template-columns:1fr} }
+    .product{
+      border:1px solid var(--border); border-radius:12px; padding:12px; background:#0e1526;
+    }
+    .product h4{margin:0 0 6px}
+    .badge{display:inline-block; padding:2px 8px; font-size:11px; border-radius:999px; border:1px solid var(--border); color:var(--muted)}
+
+    table{width:100%; border-collapse:collapse; font-size:14px}
+    th, td{padding:10px 8px; border-bottom:1px solid var(--border); text-align:left}
+    th{font-size:12px; color:var(--muted); font-weight:600}
+    tr:hover td{ background:rgba(255,255,255,.02) }
+
+    .toast{ position:fixed; right:20px; bottom:20px; display:grid; gap:10px; z-index:50 }
+    .alert{ background:#0e1526; border:1px solid var(--border); border-left:4px solid var(--brand); color:var(--text); padding:12px 14px; border-radius:12px; min-width:280px; box-shadow:var(--shadow) }
+    .alert.success{ border-left-color:var(--success) }
+    .alert.danger{ border-left-color:var(--danger) }
+    .alert.warn{ border-left-color:var(--warn) }
+    .alert small{ color:var(--muted) }
+
+    .hint{color:var(--muted); font-size:12px}
+    .pill{display:inline-flex; align-items:center; gap:8px; padding:8px 10px; border:1px solid var(--border); border-radius:999px}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">🏷️ Reservaties • Epic 3</div>
+    <span class="chip">Frontend prototype</span>
+    <span class="chip">Openingstijden 08:00–18:00</span>
+    <span class="chip">Annuleren/wijzigen tot 1u voor start</span>
+  </header>
+
+  <main class="grid">
+    <!-- Linkerkolom: reserveren + producten -->
+    <section class="card">
+      <h2>Nieuwe reservering</h2>
+      <div class="content">
+        <div class="row">
+          <div>
+            <label>Medewerker naam</label>
+            <input id="employee" placeholder="Bijv. Samira" />
+          </div>
+          <div>
+            <label>Admin modus</label>
+            <div class="pill"><input id="adminToggle" type="checkbox" /> <span class="hint">Toon/beheer alle reserveringen</span></div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label>Item</label>
+            <select id="item"></select>
+          </div>
+          <div>
+            <label>Datum</label>
+            <input id="date" type="date" />
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label>Begintijd</label>
+            <input id="start" type="time" step="900" />
+          </div>
+          <div>
+            <label>Eindtijd</label>
+            <input id="end" type="time" step="900" />
+          </div>
+        </div>
+
+        <div class="toolbar" style="margin-top:10px">
+          <button id="createBtn">Reserveren</button>
+          <button id="updateBtn" class="warn" style="display:none">Wijziging opslaan</button>
+          <button id="cancelEditBtn" class="secondary" style="display:none">Annuleren</button>
+          <div class="spacer"></div>
+          <button id="resetBtn" class="ghost">Formulier leegmaken</button>
+        </div>
+
+        <p class="hint" style="margin-top:12px">Overlap wordt automatisch geblokkeerd per item. Tijden moeten binnen de openingstijden vallen en eindtijd &gt; begintijd.</p>
+
+        <h3 style="margin-top:24px">Beschikbare items</h3>
+        <div id="products" class="products"></div>
+      </div>
+    </section>
+
+    <!-- Rechterkolom: mijn reserveringen + admin -->
+    <section class="card">
+      <h2>Reserveringen</h2>
+      <div class="content">
+        <div style="margin-bottom:10px" class="row">
+          <div>
+            <label>Filter op datum</label>
+            <input id="filterDate" type="date" />
+          </div>
+          <div>
+            <label>&nbsp;</label>
+            <button id="clearFilter" class="secondary">Filter wissen</button>
+          </div>
+        </div>
+
+        <div style="margin-bottom:10px">
+          <span class="badge">Mijn reserveringen</span>
+        </div>
+        <table id="myTable">
+          <thead>
+            <tr><th>Item</th><th>Datum</th><th>Start</th><th>Einde</th><th>Status</th><th>Acties</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+
+        <div id="adminBlock" style="margin-top:26px; display:none">
+          <div style="margin:10px 0"><span class="badge">Admin – alle reserveringen</span></div>
+          <table id="allTable">
+            <thead>
+              <tr><th>Medewerker</th><th>Item</th><th>Datum</th><th>Start</th><th>Einde</th><th>Status</th><th>Acties</th></tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // ---------------------- Config ----------------------
+    const OPENING_START = "08:00";
+    const OPENING_END   = "18:00";
+    const POLICY_LOCK_MIN_BEFORE_START = 60; // minuten
+
+    const PRODUCTS = [
+      { id: "cam1", name: "Camera A", type: "Apparaat" },
+      { id: "cam2", name: "Camera B", type: "Apparaat" },
+      { id: "mic1", name: "Microfoon set", type: "Audio" },
+      { id: "lap1", name: "Laptop 13\"", type: "IT" },
+      { id: "room1", name: "Vergaderruimte 1", type: "Ruimte" },
+      { id: "room2", name: "Studio", type: "Ruimte" },
+    ];
+
+    // ---------------------- Helpers ----------------------
+    const $ = sel => document.querySelector(sel);
+    const $$ = sel => Array.from(document.querySelectorAll(sel));
+
+    const storageKey = 'epic3-reservations-v1';
+    function getReservations(){
+      try{ return JSON.parse(localStorage.getItem(storageKey)||'[]'); }catch{ return [] }
+    }
+    function saveReservations(list){ localStorage.setItem(storageKey, JSON.stringify(list)); }
+
+    function timeToMinutes(t){ const [h,m] = t.split(':').map(Number); return h*60+m; }
+    function withinOpening(start, end){
+      return timeToMinutes(start) >= timeToMinutes(OPENING_START)
+        && timeToMinutes(end)   <= timeToMinutes(OPENING_END)
+        && timeToMinutes(end)   >  timeToMinutes(start);
+    }
+    function sameDay(a,b){ return a === b; }
+    function overlaps(a, b){
+      if(a.item!==b.item) return false;
+      if(!sameDay(a.date, b.date)) return false;
+      const s1=timeToMinutes(a.start), e1=timeToMinutes(a.end);
+      const s2=timeToMinutes(b.start), e2=timeToMinutes(b.end);
+      return (s1 < e2) && (s2 < e1); // strikt overlap
+    }
+    function isLocked(res){
+      const now = new Date();
+      const [y,mo,d] = res.date.split('-').map(Number);
+      const [sh,sm] = res.start.split(':').map(Number);
+      const startDate = new Date(y, (mo-1), d, sh, sm, 0);
+      const diffMin = Math.floor((startDate - now)/60000);
+      return diffMin < POLICY_LOCK_MIN_BEFORE_START; // niet wijzigbaar/annuleerbaar
+    }
+
+    function toast({title, body, type='success'}){
+      const t = document.createElement('div');
+      t.className = `alert ${type}`;
+      t.innerHTML = `<strong>${title}</strong><br/><small>${body||''}</small>`;
+      $('#toast').appendChild(t);
+      setTimeout(()=>{ t.remove(); }, 4200);
+    }
+
+    function formatDate(d){ return new Date(d+"T00:00:00").toLocaleDateString('nl-NL'); }
+
+    // ---------------------- Init UI ----------------------
+    function renderProducts(){
+      const cont = $('#products');
+      cont.innerHTML = '';
+      PRODUCTS.forEach(p=>{
+        const el = document.createElement('div');
+        el.className = 'product';
+        el.innerHTML = `<h4>${p.name}</h4>
+          <div class="hint">Type: ${p.type}</div>
+          <div style="margin-top:10px"><span class="badge">ID: ${p.id}</span></div>`;
+        cont.appendChild(el);
+      });
+
+      // item select
+      const select = $('#item');
+      select.innerHTML = '<option value="">Selecteer een item…</option>' + PRODUCTS.map(p=>`<option value="${p.id}">${p.name}</option>`).join('');
+    }
+
+    function renderTables(){
+      const name = $('#employee').value.trim();
+      const filterDate = $('#filterDate').value || null;
+      const all = getReservations().sort((a,b)=> (a.date+b.start).localeCompare(b.date+b.start));
+
+      const my = all.filter(r=> r.employee.toLowerCase() === name.toLowerCase());
+      const myBody = $('#myTable tbody');
+      myBody.innerHTML = my.filter(r=> !filterDate || r.date===filterDate).map(rowHtml).join('') || emptyRow(6);
+
+      const adminOn = $('#adminToggle').checked;
+      $('#adminBlock').style.display = adminOn ? 'block' : 'none';
+      if(adminOn){
+        const allBody = $('#allTable tbody');
+        allBody.innerHTML = all.filter(r=> !filterDate || r.date===filterDate).map(rowHtmlAdmin).join('') || emptyRow(7);
+      }
+    }
+
+    function emptyRow(cols){ return `<tr><td colspan="${cols}" class="hint">Geen reserveringen gevonden…</td></tr>` }
+
+    function rowHtml(r){
+      const lock = isLocked(r);
+      const actions = lock
+        ? `<button class="ghost" disabled title="Binnen 1u — vergrendeld">🔒</button>`
+        : `<button data-act="edit" data-id="${r.id}" class="secondary">Wijzig</button>
+           <button data-act="cancel" data-id="${r.id}" class="danger">Annuleer</button>`;
+      return `<tr>
+        <td>${productName(r.item)}</td>
+        <td>${formatDate(r.date)}</td>
+        <td>${r.start}</td>
+        <td>${r.end}</td>
+        <td>${lock? '🔒 Vergrendeld' : 'Actief'}</td>
+        <td>${actions}</td>
+      </tr>`;
+    }
+
+    function rowHtmlAdmin(r){
+      const lock = isLocked(r);
+      const actions = `<button data-act="edit" data-id="${r.id}" class="secondary" ${lock? 'disabled':''}>Wijzig</button>
+                       <button data-act="cancel-any" data-id="${r.id}" class="danger">Verwijder</button>`;
+      return `<tr>
+        <td>${r.employee}</td>
+        <td>${productName(r.item)}</td>
+        <td>${formatDate(r.date)}</td>
+        <td>${r.start}</td>
+        <td>${r.end}</td>
+        <td>${lock? '🔒 Vergrendeld' : 'Actief'}</td>
+        <td>${actions}</td>
+      </tr>`;
+    }
+
+    function productName(id){ return (PRODUCTS.find(p=>p.id===id)||{}).name || id }
+
+    // ---------------------- CRUD ----------------------
+    let editingId = null;
+
+    function createReservation(){
+      const employee = $('#employee').value.trim();
+      const item = $('#item').value;
+      const date = $('#date').value;
+      const start = $('#start').value;
+      const end = $('#end').value;
+
+      if(!employee) return toast({title:'Naam verplicht', body:'Vul je naam in om te reserveren.', type:'danger'});
+      if(!item || !date || !start || !end) return toast({title:'Onvolledig formulier', body:'Kies item, datum en tijden.', type:'danger'});
+      if(!withinOpening(start,end)) return toast({title:'Buiten openingstijden', body:`Tijden moeten tussen ${OPENING_START} en ${OPENING_END} liggen en logisch zijn.`, type:'danger'});
+
+      const all = getReservations();
+      const candidate = { id: crypto.randomUUID(), employee, item, date, start, end };
+
+      // Overlap-check
+      const conflict = all.some(r=> overlaps(r, candidate));
+      if(conflict) return toast({title:'Conflict gedetecteerd', body:'Er bestaat al een reservering die overlapt.', type:'danger'});
+
+      all.push(candidate); saveReservations(all); renderTables();
+      toast({title:'Reservering bevestigd', body:`${productName(item)} op ${formatDate(date)} ${start}–${end}`});
+      clearForm();
+    }
+
+    function startEdit(id){
+      const all = getReservations();
+      const r = all.find(x=>x.id===id); if(!r) return;
+      editingId = id;
+      $('#item').value = r.item;
+      $('#date').value = r.date;
+      $('#start').value = r.start;
+      $('#end').value = r.end;
+      $('#createBtn').style.display = 'none';
+      $('#updateBtn').style.display = 'inline-block';
+      $('#cancelEditBtn').style.display = 'inline-block';
+      window.scrollTo({ top: 0, behavior:'smooth'});
+    }
+
+    function updateReservation(){
+      if(!editingId) return;
+      const all = getReservations();
+      const idx = all.findIndex(x=>x.id===editingId);
+      if(idx<0) return;
+
+      const employee = all[idx].employee; // medewerker blijft gelijk
+      const item = $('#item').value, date=$('#date').value, start=$('#start').value, end=$('#end').value;
+      if(!item || !date || !start || !end) return toast({title:'Onvolledig', body:'Vul alle velden in.', type:'danger'});
+      if(!withinOpening(start,end)) return toast({title:'Buiten openingstijden', body:`Tijden moeten tussen ${OPENING_START} en ${OPENING_END} liggen.`, type:'danger'});
+
+      const candidate = { id: editingId, employee, item, date, start, end };
+      const conflict = getReservations().some(r=> r.id!==editingId && overlaps(r, candidate));
+      if(conflict) return toast({title:'Conflict gedetecteerd', body:'Overlap met bestaande reservering.', type:'danger'});
+
+      // beleidsregel: wijzigen toegestaan tot 1u voor start
+      if(isLocked(all[idx])){ return toast({title:'Wijzigen geblokkeerd', body:'Binnen 1 uur voor start.', type:'danger'}); }
+
+      all[idx] = candidate; saveReservations(all);
+      editingId=null; renderTables(); clearForm();
+      toast({title:'Wijziging opgeslagen', body:`${productName(item)} op ${formatDate(date)} ${start}–${end}`});
+    }
+
+    function cancelReservation(id, any=false){
+      const all = getReservations();
+      const idx = all.findIndex(x=>x.id===id); if(idx<0) return;
+
+      if(!any && isLocked(all[idx])){ return toast({title:'Annuleren geblokkeerd', body:'Binnen 1 uur voor start.', type:'danger'}); }
+
+      const removed = all.splice(idx,1)[0]; saveReservations(all); renderTables();
+      toast({title:'Reservering geannuleerd', body:`${productName(removed.item)} • ${formatDate(removed.date)} ${removed.start}–${removed.end}`});
+    }
+
+    function clearForm(){
+      $('#item').value=''; $('#date').value=''; $('#start').value=''; $('#end').value='';
+      $('#createBtn').style.display = 'inline-block';
+      $('#updateBtn').style.display = 'none';
+      $('#cancelEditBtn').style.display = 'none';
+    }
+
+    // ---------------------- Events ----------------------
+    $('#createBtn').addEventListener('click', createReservation);
+    $('#updateBtn').addEventListener('click', updateReservation);
+    $('#cancelEditBtn').addEventListener('click', ()=>{ editingId=null; clearForm(); });
+    $('#resetBtn').addEventListener('click', clearForm);
+    $('#employee').addEventListener('input', renderTables);
+    $('#adminToggle').addEventListener('change', renderTables);
+    $('#filterDate').addEventListener('change', renderTables);
+    $('#clearFilter').addEventListener('click', ()=>{ $('#filterDate').value=''; renderTables(); });
+
+    // event delegation voor actieknoppen
+    $('#myTable').addEventListener('click', (e)=>{
+      const btn = e.target.closest('button'); if(!btn) return;
+      const id = btn.getAttribute('data-id');
+      if(btn.dataset.act==='edit') startEdit(id);
+      if(btn.dataset.act==='cancel') cancelReservation(id,false);
+    });
+    $('#allTable').addEventListener('click', (e)=>{
+      const btn = e.target.closest('button'); if(!btn) return;
+      const id = btn.getAttribute('data-id');
+      if(btn.dataset.act==='edit') startEdit(id);
+      if(btn.dataset.act==='cancel-any') cancelReservation(id,true);
+    });
+
+    // ---------------------- Boot ----------------------
+    (function boot(){
+      renderProducts();
+      // prefills
+      const today = new Date();
+      const yyyy = today.getFullYear();
+      const mm = String(today.getMonth()+1).padStart(2,'0');
+      const dd = String(today.getDate()).padStart(2,'0');
+      $('#date').value = `${yyyy}-${mm}-${dd}`;
+      $('#filterDate').value = '';
+      $('#start').value = '09:00';
+      $('#end').value = '10:00';
+      renderTables();
+    })();
+  </script>
+</body>
+</html>
