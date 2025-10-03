@@ -4,156 +4,61 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Gebruikersinstellingen</title>
-  <style>
-    :root {
-      --bg:#0b0e14;
-      --panel:#131827;
-      --muted:#9aa4bf;
-      --text:#eef2ff;
-      --brand:#5b8cfe;
-      --danger:#ff6b6b;
-      --success:#27c093;
-      --warn:#ffb86b;
-      --border:#232a3d;
-      --radius:16px;
-      --shadow: 0 10px 30px rgba(0,0,0,.35);
-    }
-
-    body {
-      font-family: Arial, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      margin: 0;
-      padding: 2rem;
-    }
-
-    h1 {
-      text-align: center;
-      margin-bottom: 2rem;
-      color: var(--brand);
-    }
-
-    .panel {
-      background: var(--panel);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: 1.5rem;
-      max-width: 900px;
-      margin: 0 auto;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-
-    th, td {
-      text-align: left;
-      padding: 12px;
-      border-bottom: 1px solid var(--border);
-    }
-
-    th {
-      color: var(--muted);
-      text-transform: uppercase;
-      font-size: 0.9rem;
-    }
-
-    .role {
-      font-weight: bold;
-      padding: 4px 10px;
-      border-radius: 12px;
-    }
-
-    .role.admin {
-      background: rgba(91, 140, 254, 0.1);
-      color: var(--brand);
-    }
-
-    .role.user {
-      background: rgba(154, 164, 191, 0.1);
-      color: var(--muted);
-    }
-
-    .actions button {
-      border: none;
-      padding: 8px 14px;
-      margin-right: 6px;
-      border-radius: 8px;
-      font-size: 0.85rem;
-      cursor: pointer;
-      transition: 0.2s;
-    }
-
-    .actions .make-admin {
-      background: var(--brand);
-      color: white;
-    }
-
-    .actions .make-admin:hover {
-      opacity: 0.85;
-    }
-
-    .actions .remove {
-      background: var(--danger);
-      color: white;
-    }
-
-    .actions .remove:hover {
-      opacity: 0.85;
-    }
-
-    .actions .save {
-      background: var(--success);
-      color: white;
-    }
-
-    .actions .save:hover {
-      opacity: 0.85;
-    }
-  </style>
+  <link rel="stylesheet" href="beheersingssysteem.css">
+  <script src="beheersingssysteem.js" defer></script>
 </head>
 <body>
-  <h1>Gebruikersinstellingen</h1>
-  <div class="panel">
-    <table>
-      <thead>
-        <tr>
-          <th>Gebruiker</th>
-          <th>Email</th>
-          <th>Rol</th>
-          <th>Acties</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>Jan Jansen</td>
-          <td>jan@example.com</td>
-          <td><span class="role admin">Admin</span></td>
-          <td class="actions">
-            <button class="remove">Verwijder</button>
-          </td>
-        </tr>
-        <tr>
-          <td>Lisa Peters</td>
-          <td>lisa@example.com</td>
-          <td><span class="role user">Gebruiker</span></td>
-          <td class="actions">
-            <button class="make-admin">Maak Admin</button>
-            <button class="remove">Verwijder</button>
-          </td>
-        </tr>
-        <tr>
-          <td>Tom de Vries</td>
-          <td>tom@example.com</td>
-          <td><span class="role user">Gebruiker</span></td>
-          <td class="actions">
-            <button class="make-admin">Maak Admin</button>
-            <button class="remove">Verwijder</button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+  <!-- HEADER -->
+  <header>
+    <h1>Admin Paneel</h1>
+    <div class="header-actions">
+      <div class="search">
+        <href>
+        <input type="text" placeholder="Zoek gebruiker...">
+  </header>
+
+  <main>
+    <h2>Gebruikersinstellingen</h2>
+    <div class="panel">
+      <table>
+        <thead>
+          <tr>
+            <th>Gebruiker</th>
+            <th>Email</th>
+            <th>Rol</th>
+            <th>Acties</th>
+          </tr>
+        </thead>
+        <tbody>
+            <tr>
+              <td>Jan Jansen</td>
+              <td>jan@example.com</td>
+              <td><span class="role admin">Admin</span></td>
+              <td class="actions">
+                <button class="remove-admin">Verwijder Admin</button>
+              </td>
+            </tr>
+            <tr>
+              <td>Lisa Peters</td>
+              <td>lisa@example.com</td>
+              <td><span class="role user">Gebruiker</span></td>
+              <td class="actions">
+                <button class="make-admin">Maak Admin</button>
+              </td>
+            </tr>
+            <tr>
+              <td>Tom de Vries</td>
+              <td>tom@example.com</td>
+              <td><span class="role user">Gebruiker</span></td>
+              <td class="actions">
+                <button class="make-admin">Maak Admin</button>
+              </td>
+            </tr>
+
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
 </body>
 </html>

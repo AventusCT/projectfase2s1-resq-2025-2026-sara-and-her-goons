@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Reservaties – Epic 3 (Frontend Prototype)</title>
+  <link rel="stylesheet" href="Reservaties.css" />
+  <script src="Reservaties.js" defer></script>
+</head>
+<body>
+  <header>
+    <div class="logo">🏷️ Reservaties • Epic 3</div>
+    <span class="chip">Frontend prototype</span>
+    <span class="chip">Openingstijden 08:00–18:00</span>
+    <span class="chip">Annuleren/wijzigen tot 1u voor start</span>
+  </header>
+
+  <main class="grid">
+    <!-- Linkerkolom: reserveren + producten -->
+    <section class="card">
+      <h2>Nieuwe reservering</h2>
+      <div class="content">
+        <div class="row">
+          <div>
+            <label>Medewerker naam</label>
+            <input id="employee" placeholder="Bijv. Samira" />
+          </div>
+          <div>
+            <label>Admin modus</label>
+            <div class="pill"><input id="adminToggle" type="checkbox" /> <span class="hint">Toon/beheer alle reserveringen</span></div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label>Item</label>
+            <select id="item"></select>
+          </div>
+          <div>
+            <label>Datum</label>
+            <input id="date" type="date" />
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label>Begintijd</label>
+            <input id="start" type="time" step="900" />
+          </div>
+          <div>
+            <label>Eindtijd</label>
+            <input id="end" type="time" step="900" />
+          </div>
+        </div>
+
+        <div class="toolbar" style="margin-top:10px">
+          <button id="createBtn">Reserveren</button>
+          <button id="updateBtn" class="warn" style="display:none">Wijziging opslaan</button>
+          <button id="cancelEditBtn" class="secondary" style="display:none">Annuleren</button>
+          <div class="spacer"></div>
+          <button id="resetBtn" class="ghost">Formulier leegmaken</button>
+        </div>
+
+        <p class="hint" style="margin-top:12px">Overlap wordt automatisch geblokkeerd per item. Tijden moeten binnen de openingstijden vallen en eindtijd &gt; begintijd.</p>
+
+        <h3 style="margin-top:24px">Beschikbare items</h3>
+        <div id="products" class="products"></div>
+      </div>
+    </section>
+
+    <!-- Rechterkolom: mijn reserveringen + admin -->
+    <section class="card">
+      <h2>Reserveringen</h2>
+      <div class="content">
+        <div style="margin-bottom:10px" class="row">
+          <div>
+            <label>Filter op datum</label>
+            <input id="filterDate" type="date" />
+          </div>
+          <div>
+            <label>&nbsp;</label>
+            <button id="clearFilter" class="secondary">Filter wissen</button>
+          </div>
+        </div>
+
+        <div style="margin-bottom:10px">
+          <span class="badge">Mijn reserveringen</span>
+        </div>
+        <table id="myTable">
+          <thead>
+            <tr><th>Item</th><th>Datum</th><th>Start</th><th>Einde</th><th>Status</th><th>Acties</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+
+        <div id="adminBlock" style="margin-top:26px; display:none">
+          <div style="margin:10px 0"><span class="badge">Admin – alle reserveringen</span></div>
+          <table id="allTable">
+            <thead>
+              <tr><th>Medewerker</th><th>Item</th><th>Datum</th><th>Start</th><th>Einde</th><th>Status</th><th>Acties</th></tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="toast" id="toast"></div>
+
+</body>
+</html>
