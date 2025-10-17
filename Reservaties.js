@@ -1,4 +1,5 @@
-    // ---------------------- Config ----------------------
+// ===== Door Sara =====
+ // ---------------------- Config ----------------------
     const OPENING_START = "08:00";
     const OPENING_END   = "18:00";
     const POLICY_LOCK_MIN_BEFORE_START = 60; // minuten
