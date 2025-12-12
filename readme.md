@@ -1,6 +1,6 @@
-# Website openen (Frontend Prototype)
+# Reservaties – Epic 3 (Frontend Prototype)
 
-Dit project is een **minimale frontend** voor de Website.  
+Dit project is een **minimale frontend** voor het reserveringssysteem (Epic 3).  
 Het is bedoeld om de werking van de user stories in de frontend te demonstreren, zonder backend.
 
 ## 🚀 Installatie & Gebruik
